@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenTrace — Debug with evidence</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="OpenTrace home"><span class="brand-mark">◈</span> OpenTrace</a>
+    <span class="tagline">local-first incident clarity</span>
+    <span class="github">Open source ready</span>
+  </header>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">OPEN-SOURCE AI / DEBUGGING</p>
+      <h1>Turn noisy logs into<br><em>your next best move.</em></h1>
+      <p class="lede">OpenTrace separates evidence from guesses and gives you a calm, actionable debugging plan. Your logs stay on your machine when you use Ollama.</p>
+    </section>
+    <section class="workspace" aria-label="Log analysis workspace">
+      <div class="input-card card">
+        <div class="card-heading"><div><span class="step">01</span><h2>Drop in the signal</h2></div><span id="char-count">0 / 12,000</span></div>
+        <textarea id="log-input" maxlength="12000" placeholder="Paste an error, stack trace, or service log here…&#10;&#10;Tip: include the timestamp, service name, and the first error if you have them."></textarea>
+        <div class="input-footer"><button id="sample-button" class="quiet">Use sample log</button><button id="analyze-button" class="primary">Analyze locally <span>→</span></button></div>
+      </div>
+      <div id="result-card" class="result-card card empty">
+        <div class="empty-state"><div class="pulse">✦</div><h2>Your trace, made legible.</h2><p>Analysis will appear here with evidence, likely cause, and safe next steps.</p></div>
+      </div>
+    </section>
+    <section class="trust-row">
+      <div><strong>Local by default</strong><span>Ollama-compatible models</span></div>
+      <div><strong>Evidence first</strong><span>Hypotheses are labeled</span></div>
+      <div><strong>Safe by design</strong><span>No destructive commands</span></div>
+    </section>
+  </main>
+  <footer><span>Built for Hacktoberfest Open-Source AI Challenge · Week 4</span><span>OpenTrace v1.0</span></footer>
+  <script>
+    const input = document.querySelector("#log-input");
+    const count = document.querySelector("#char-count");
+    const result = document.querySelector("#result-card");
+    const button = document.querySelector("#analyze-button");
+    const sample = `2026-10-30T14:22:11Z api-7f6c ERROR request_id=8d21
+POST /api/orders 500
+Error: connect ECONNREFUSED 10.0.2.15:5432
+    at TCPConnectWrap.afterConnect (node:net:1637:16)
+Database connection failed after 3 retries
+deploy=orders-api@2.4.1 environment=production`;
+    input.addEventListener("input", () => count.textContent = `${input.value.length.toLocaleString()} / 12,000`);
+    sample.addEventListener("click", () => { input.value = sample; input.dispatchEvent(new Event("input")); input.focus(); });
+    function list(title, items, className) {
+      return `<div class="result-section ${className || ""}"><h3>${title}</h3><ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>`;
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char]);
+    }
+    button.addEventListener("click", async () => {
+      if (!input.value.trim()) { input.focus(); return; }
+      button.disabled = true; button.innerHTML = "Reading trace <span class=\"spinner\">◌</span>";
+      result.className = "result-card card loading";
+      result.innerHTML = `<div class="loading-state"><div class="pulse">✦</div><p>Separating signal from noise…</p></div>`;
+      try {
+        const response = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ log: input.value }) });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || "Analysis failed.");
+        const a = payload.analysis;
+        result.className = "result-card card";
+        result.innerHTML = `<div class="result-heading"><div><span class="step">02</span><h2>Trace report</h2></div><span class="mode">${payload.mode === "ollama" ? "OLLAMA / LOCAL" : "DEMO MODE"}</span></div>
+          <div class="summary"><span class="severity ${escapeHtml(a.severity)}">${escapeHtml(a.severity)}</span><p>${escapeHtml(a.summary)}</p></div>
+          <div class="cause"><h3>Likely cause</h3><p>${escapeHtml(a.rootCause)}</p></div>
+          ${list("Evidence", a.evidence, "evidence")}${list("Next safe moves", a.actions, "actions")}${a.questions?.length ? list("What would sharpen this", a.questions, "questions") : ""}
+          <p class="safety">⚠ ${escapeHtml(a.safetyNote)}</p>`;
+      } catch (error) {
+        result.className = "result-card card error"; result.innerHTML = `<div class="empty-state"><div class="pulse">!</div><h2>Could not analyze</h2><p>${escapeHtml(error.message)}</p></div>`;
+      } finally { button.disabled = false; button.innerHTML = "Analyze locally <span>→</span>"; }
+    });
+  </script>
+</body>
+</html>
