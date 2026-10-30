@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: opentrace-ai-debugger
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: OLLAMA_URL
+        value: http://127.0.0.1:11434
+      - key: OLLAMA_MODEL
+        value: llama3.2:3b

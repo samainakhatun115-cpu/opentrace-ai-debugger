@@ -27,6 +27,14 @@ For local AI analysis, install Ollama, then download a model:
 ollama pull llama3.2:3b
 ```
 
+### Deploying a public demo
+
+The repository includes a `render.yaml` blueprint for Render. A public
+deployment runs in clearly labelled Demo Mode because Ollama is local to your
+machine and is not included in the hosted service. Do not describe the hosted
+deployment as local model inference unless you configure a separate hosted
+model endpoint.
+
 You can change the model or port:
 
 ```powershell

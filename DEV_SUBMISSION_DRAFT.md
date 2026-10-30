@@ -9,7 +9,7 @@ an error, stack trace, or service log and receives a structured report with a
 summary, severity, evidence, likely cause, safe next actions, and questions
 that would improve the diagnosis.
 
-**Live demo:** TODO — add a deployed URL if the challenge accepts submissions.
+**Live demo:** TODO — replace with the healthy Render URL after deployment.
 
 **Source code:** https://github.com/samainakhatun115-cpu/opentrace-ai-debugger
 
