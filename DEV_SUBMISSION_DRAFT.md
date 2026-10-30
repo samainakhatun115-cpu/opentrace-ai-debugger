@@ -11,7 +11,7 @@ that would improve the diagnosis.
 
 **Live demo:** TODO — add a deployed URL if the challenge accepts submissions.
 
-**Source code:** TODO — add the public GitHub URL after creating the repository.
+**Source code:** https://github.com/samainakhatun115-cpu/opentrace-ai-debugger
 
 ## Why this problem
 
